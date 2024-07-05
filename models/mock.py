@@ -6,6 +6,7 @@ class MockModel():
         self.max_length = max_length
         self.delay = delay
         sleep(init_delay)
+        print(f"Load {model_name} model complete.")
 
     def generate_response(self, prompt, messages=[]):
         sleep(self.delay)

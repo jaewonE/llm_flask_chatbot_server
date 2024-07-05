@@ -1,6 +1,6 @@
 from typing import Optional
 from utils.file import load_json, save_json
-from constants.path import USER_INFO_PATH
+from constants.paths import USER_INFO_PATH
 
 
 def get_user_info(user_name: str) -> Optional[dict]:

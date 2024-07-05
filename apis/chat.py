@@ -2,8 +2,9 @@ from flask import Blueprint, jsonify, g
 from uuid import uuid4
 from datetime import datetime
 from utils.file import save_json
-from utils.model import load_model, model_locks, able_model_list
+from utils.model import load_model, model_locks, able_model_list, scheduler
 from utils.validate import validate_json
+from utils.history import get_history, append_history
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -17,13 +18,11 @@ def new_chat():
     if model_name not in able_model_list:
         return jsonify({'status': 'error', 'message': 'Model not found.'}), 400
 
-    model = load_model(model_name, max_length=max_length)
+    load_model(model_name, max_length=max_length)
     chat_id = str(uuid4())
     cur_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    model_lock = model_locks[model_name]
-    with model_lock:
-        response = model.generate_response(query)
+    response = scheduler.generate(model_name, query)
 
     history = {
         'init_time': cur_time,
@@ -55,11 +54,9 @@ def add_message(chat_id):
     if not history:
         return jsonify({'status': 'error', 'message': 'Chat history not found.'}), 404
 
-    model = load_model(model_name, max_length=max_length)
+    load_model(model_name, max_length=max_length)
 
-    model_lock = model_locks[model_name]
-    with model_lock:
-        response = model.generate_response(query, history['messages'])
+    response = scheduler.generate(model_name, query, history['messages'])
 
     if not append_history(chat_id, user_name, query, response):
         return jsonify({'status': 'error', 'message': 'Chat history not found.'}), 404

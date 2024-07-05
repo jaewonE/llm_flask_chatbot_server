@@ -163,7 +163,5 @@ cython_debug/
 
 # custom
 model.py
-app.py
-app2.py
 user_info.json
 history/

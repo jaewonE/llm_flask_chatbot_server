@@ -8,7 +8,8 @@ def get_user_info(user_name: str) -> Optional[dict]:
     return user_json.get(user_name)
 
 
-def append_user_info(user_name: str) -> None:
+def append_user_info(user_name: str, user_password: str) -> None:
     user_json = load_json(USER_INFO_PATH)
-    user_json[user_name] = {'user_name': user_name}
+    user_json[user_name] = {'user_name': user_name,
+                            'user_password': user_password}
     save_json(USER_INFO_PATH, user_json)

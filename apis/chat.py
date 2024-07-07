@@ -5,11 +5,13 @@ from utils.file import save_json
 from utils.model import load_model, model_locks, able_model_list, scheduler
 from utils.validate import validate_json
 from utils.history import get_history, append_history
+from utils.jwt import jwt_required
 
 chat_bp = Blueprint('chat', __name__)
 
 
 @chat_bp.route('/chat/new', methods=['POST'])
+@jwt_required
 @validate_json(['model_name', 'user_name', 'query'])
 def new_chat():
     model_name, user_name, query = g.data['model_name'], g.data['user_name'], g.data['query']
@@ -42,6 +44,7 @@ def new_chat():
 
 
 @chat_bp.route('/chat/<chat_id>', methods=['POST'])
+@jwt_required
 @validate_json(['model_name', 'user_name', 'query'])
 def add_message(chat_id):
     model_name, user_name, query = g.data['model_name'], g.data['user_name'], g.data['query']

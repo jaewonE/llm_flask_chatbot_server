@@ -2,6 +2,7 @@ import threading
 from queue import Queue
 from time import sleep, time
 from models.mock import MockModel
+from typing import List, Dict, Any
 
 
 class ModelScheduler():
@@ -15,19 +16,20 @@ class ModelScheduler():
             self.models[model_name] = model
             self.request_queues[model_name] = Queue()
 
-    def generate(self, model_name: str, prompt: str):
+    def generate(self, model_name: str, prompt: str, histories: List[Dict[str, Any]] = []):
         if model_name not in self.models:
             raise ValueError(f"Model {model_name} not found")
 
         result = Queue()
-        self.request_queues[model_name].put((prompt, result))
+        self.request_queues[model_name].put((prompt, histories, result))
         response = result.get()
         return response
 
     def _process_requests(self, model_name):
         while True:
-            prompt, result = self.request_queues[model_name].get()
-            response = self.models[model_name].generate_response(prompt)
+            prompt, histories, result = self.request_queues[model_name].get()
+            response = self.models[model_name].generate_response(
+                prompt, histories)
             result.put(response)
 
     def start_processing(self):

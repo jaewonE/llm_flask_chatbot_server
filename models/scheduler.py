@@ -10,15 +10,25 @@ class ModelScheduler():
         self.models = {}
         self.lock = threading.Lock()
         self.request_queues = {}
+        self.last_request_time = {}
+        self.timeout = 3600  # 1 hour
+
+        # Start a thread to periodically clean up idle models
+        cleanup_thread = threading.Thread(target=self._cleanup_idle_models)
+        cleanup_thread.daemon = True
+        cleanup_thread.start()
 
     def add_model(self, model_name, model):
         with self.lock:
             self.models[model_name] = model
             self.request_queues[model_name] = Queue()
+            self.last_request_time[model_name] = time()
 
     def generate(self, model_name: str, prompt: str, histories: List[Dict[str, Any]] = []):
         if model_name not in self.models:
             raise ValueError(f"Model {model_name} not found")
+
+        self.last_request_time[model_name] = time()
 
         result = Queue()
         self.request_queues[model_name].put((prompt, histories, result))
@@ -39,6 +49,23 @@ class ModelScheduler():
             thread.daemon = True
             thread.start()
 
+    def _cleanup_idle_models(self):
+        while True:
+            with self.lock:
+                current_time = time()
+                to_remove = []
+                for model_name, last_time in self.last_request_time.items():
+                    if current_time - last_time > self.timeout:
+                        to_remove.append(model_name)
+
+                for model_name in to_remove:
+                    print(f"Removing idle model: {model_name}")
+                    del self.models[model_name]
+                    del self.request_queues[model_name]
+                    del self.last_request_time[model_name]
+
+            sleep(60)  # Check every minute
+
 
 # Usage example
 if __name__ == "__main__":
@@ -56,6 +83,7 @@ if __name__ == "__main__":
     # Generate responses
     def async_generate(scheduler, model_name, prompt):
         response = scheduler.generate(model_name, prompt)
+        print(response)
 
     # Create threads to simulate asynchronous requests
     threading.Thread(target=async_generate, args=(

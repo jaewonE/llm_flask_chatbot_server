@@ -35,3 +35,16 @@ def signin_api():
         'status': 'success',
         'message': 'Login successful.',
         'x-jwt': jwt_instance.sign_user(user_name)})
+
+
+@user_bp.route('/user/get', methods=['GET'])
+def get_user_api():
+    jwt = request.headers.get('x-jwt')
+    user_name = jwt_instance.verify_user(jwt)
+    if not user_name:
+        return jsonify({'status': 'error', 'message': 'User not found.'}), 404
+    return jsonify({
+        'status': 'success',
+        'message': 'User validate successfully.',
+        'user_name': user_name,
+        'x-jwt': jwt_instance.sign_user(user_name)})

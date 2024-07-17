@@ -6,6 +6,7 @@ from utils.model import load_model, model_locks, able_model_list, scheduler
 from utils.validate import validate_json
 from utils.history import get_history, append_history
 from utils.jwt import jwt_required
+from uuid import uuid4
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -33,9 +34,16 @@ def new_chat():
         'creater': user_name,
         'model_name': model_name,
         'messages': [
-            {'role': 'user', 'content': query,
-                'time': cur_time, 'user_name': user_name},
-            {'role': 'assistant', 'content': response}
+            {'role': 'user',
+             'content': query,
+             'mes_id': str(uuid4()),
+             'time': cur_time,
+             'user_name': user_name},
+            {'role': 'assistant',
+             'content': response,
+             'mes_id': str(uuid4()),
+             'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+             'user_name': 'assistant'}
         ]
     }
     save_json(f"history/{chat_id}.json", history)

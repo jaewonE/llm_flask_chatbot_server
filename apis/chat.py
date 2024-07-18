@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, g
 from uuid import uuid4
 from datetime import datetime
 from utils.file import save_json
-from utils.model import load_model, model_locks, able_model_list, scheduler
+from utils.model import load_model, able_model_list, scheduler
 from utils.validate import validate_json
 from utils.history import get_history, append_history
 from utils.jwt import jwt_required

@@ -6,6 +6,8 @@ import bcrypt
 
 user_bp = Blueprint('user', __name__)
 
+# 회원가입
+
 
 @user_bp.route('/user/signup', methods=['POST'])
 @validate_json(['user_name', 'user_password', 'access_code'])
@@ -22,6 +24,8 @@ def signup_api():
         'status': 'success',
         'message': 'User created successfully.',
         'x-jwt': jwt_instance.sign_user(user_name)})
+
+# 로그인
 
 
 @user_bp.route('/user/signin', methods=['POST'])

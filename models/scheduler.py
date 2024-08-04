@@ -31,7 +31,7 @@ class ModelScheduler():
         self.last_request_time[model_name] = time()
 
         result = Queue()
-        self.request_queues[model_name].put((prompt, histories, result))
+        self.request_queues[model_name].put((prompt, histories[:4], result))
         response = result.get()
         return response
 

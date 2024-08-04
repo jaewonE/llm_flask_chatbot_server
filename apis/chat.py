@@ -10,6 +10,8 @@ from uuid import uuid4
 
 chat_bp = Blueprint('chat', __name__)
 
+# http://localhost:8502/chat/new # 새로운 채팅
+
 
 @chat_bp.route('/chat/new', methods=['POST'])
 @jwt_required
@@ -50,6 +52,9 @@ def new_chat():
 
     return jsonify({'status': 'success', 'message': 'Chat created successfully.', 'data': {'chat_id': chat_id, 'answer': response}})
 
+ # http://localhost:8502/chat/<chat_id>
+ # 기존에 있던 채팅 방에서 이어 채팅하기.
+
 
 @chat_bp.route('/chat/<chat_id>', methods=['POST'])
 @jwt_required
@@ -65,11 +70,14 @@ def add_message(chat_id):
     if not history:
         return jsonify({'status': 'error', 'message': 'Chat history not found.'}), 404
 
+    if not append_history(chat_id, user_name, query):
+        return jsonify({'status': 'error', 'message': 'Chat history not found.'}), 404
+
     load_model(model_name, max_length=max_length)
 
     response = scheduler.generate(model_name, query, history['messages'])
 
-    if not append_history(chat_id, user_name, query, response):
+    if not append_history(chat_id, 'assistant', response):
         return jsonify({'status': 'error', 'message': 'Chat history not found.'}), 404
 
     return jsonify({'status': 'success', 'message': 'Message added successfully.', 'data': {'answer': response}})

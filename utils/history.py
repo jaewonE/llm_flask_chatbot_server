@@ -13,22 +13,16 @@ def get_history(chat_id: str) -> Optional[dict]:
     return history
 
 
-def append_history(chat_id: str, user_name: str, query: str, response: str) -> bool:
+def append_history(chat_id: str, user_name: str, content: str) -> bool:
     history = get_history(chat_id)
     if not history:
         return False
     history['messages'].append(
-        {'role': 'user',
-         'content': query,
+        {'role': 'user' if user_name == 'assistant' else 'assistant',
+         'content': content,
          'mes_id': str(uuid4()),
          'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
          'user_name': user_name})
-    history['messages'].append(
-        {'role': 'assistant',
-         'content': response,
-         'mes_id': str(uuid4()),
-         'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-         'user_name': 'assistant'})
     history['last_modified_time'] = datetime.now().strftime(
         '%Y-%m-%d %H:%M:%S')
     save_json(f"history/{chat_id}.json", history)
